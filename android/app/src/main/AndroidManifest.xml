@@ -30,6 +30,9 @@
   >
     <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="YOUR-APP-URL-HERE"/>
     <meta-data android:name="expo.modules.updates.EXPO_SDK_VERSION" android:value="YOUR-APP-SDK-VERSION-HERE"/>
+    <meta-data
+    android:name="com.google.android.geo.API_KEY"
+    android:value="AIzaSyAKvwE4FnOZuPV1hipBVKFv5Hawk23mqJc"/>
     <activity
       android:name=".MainActivity"
       android:label="@string/app_name"
@@ -44,5 +47,6 @@
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity"/>
+    <uses-library android:name="org.apache.http.legacy" android:required="false"/>
   </application>
 </manifest>
