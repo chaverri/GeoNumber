@@ -1,0 +1,17 @@
+{
+  "name": "geohash",
+  "displayName": "geohash",
+  "expo": {
+    "name": "geohash",
+    "slug": "geohash",
+    "version": "1.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
