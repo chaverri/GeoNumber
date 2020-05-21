@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Alert, ToastAndroid, Platform, AlertIOS, } from 'react-native';
-import MapView, { PROVIDER_GOOGLE, Marker, Callout, Circle } from 'react-native-maps';
+import { StyleSheet, Text, View, Alert} from 'react-native';
+import MapView, { PROVIDER_GOOGLE, Marker, Callout, Circle, Polygon } from 'react-native-maps';
 import Geohash from 'latlon-geohash'
 
 const latitudeDelta = 0.00122;
 const longitudeDelta = 0.000421;
-const defaultAccuracy = 4.7;
+const defaultAccuracy = 0;
 
 export default class App extends Component {
   temp = {
@@ -14,8 +14,8 @@ export default class App extends Component {
   };
 
   state = {
-      latitude: 37.78825,
-      longitude: -122.4324,
+      latitude: 40.757960,
+      longitude: -73.985563,
       latitudeDelta,
       longitudeDelta,
       isLoading: false,
@@ -27,10 +27,10 @@ export default class App extends Component {
 		navigator.geolocation.getCurrentPosition(
 			position => {
 				this.setState({
-          latitude: this.round(position.coords.latitude) ,
+          latitude: this.round(position.coords.latitude),
           longitude: this.round(position.coords.longitude),
           isLoading: false,
-          accuracy: position.coords.accuracy
+          accuracy: Number(position.coords.accuracy.toFixed(0))
         });
 			},
 			error => Alert.alert(error.message),
@@ -46,8 +46,54 @@ export default class App extends Component {
     return Number(parseFloat(coordinate).toFixed(5));
   }
 
-  getFormattedCoordinates(){
-    return Geohash.encode(this.state.latitude, this.state.longitude, 9).toUpperCase().replace(/(.{1})(.{4})(.{4})/gi, "$1-$2-$3");
+  getCurrentGeoHash(){
+    try{
+      return Geohash.encode(this.state.latitude, this.state.longitude, 9);
+    }catch(error){
+      return null;
+    }
+  }
+
+  getFormattedGeoHash(){
+      let geohash = this.getCurrentGeoHash();
+      return geohash ? geohash.toUpperCase().replace(/(.{1})(.{4})(.{4})/gi, "$1-$2-$3") : '?-????-????';
+  }
+
+  getPolygonBounds(){
+    let geohash = this.getCurrentGeoHash();
+
+    if(!geohash){
+      return [];
+    }
+
+    let polygonBounds=[];
+    let bounds = Geohash.bounds(geohash);
+
+    //NW
+    polygonBounds.push({
+      longitude: bounds.sw.lon,
+      latitude: bounds.ne.lat
+    });
+
+    //NE
+    polygonBounds.push({
+      latitude: bounds.ne.lat,
+      longitude: bounds.ne.lon,
+    });
+
+     //SE
+     polygonBounds.push({
+      longitude: bounds.ne.lon,
+      latitude: bounds.sw.lat
+    });
+
+    //SW
+    polygonBounds.push({
+      latitude: bounds.sw.lat,
+      longitude: bounds.sw.lon,
+    });
+    
+    return polygonBounds;
   }
 
 	render() {
@@ -73,6 +119,8 @@ export default class App extends Component {
             }}
             anchor={{ x: 0.5, y: 0.9 }}
             image={isLoading ? require('./img/target_question.png') : require('./img/target.png')}
+            onDragStart={()=>{this.setState({latitudeDelta: this.temp.lastLatitudeDelta,
+              longitudeDelta: this.temp.lastLongitudeDelta});}}
             onDrag={()=>{this.setState({isLoading:true})}}
             onDragEnd={(e) => this.setState({
               latitude : this.round(e.nativeEvent.coordinate.latitude),
@@ -80,10 +128,11 @@ export default class App extends Component {
               latitudeDelta: this.temp.lastLatitudeDelta,
               longitudeDelta: this.temp.lastLongitudeDelta,
               accuracy: defaultAccuracy,
-              isLoading: false
+              isLoading: false,
+              tracksViewChanges: false
               })}>
               <Callout>
-                <Text>Precision: {this.state.accuracy}m{'\u00B2'}</Text> 
+                <Text>Precisión GPS: {this.state.accuracy}m{'\u00B2'}</Text> 
               </Callout>
           </Marker>
           <Circle
@@ -91,15 +140,19 @@ export default class App extends Component {
             radius={this.state.accuracy}
             fillColor="rgba(138, 195, 214, 0.4)"
             strokeColor="rgba(44, 104, 125, 0.5)"
-            zIndex={2}
-            strokeWidth={2}
+            strokeWidth={1}
           />
+          <Polygon
+              coordinates={this.getPolygonBounds()}
+              strokeColor="rgba(255,0,0,0.5)"
+              fillColor="rgba(255,0,0,0.2)"
+              strokeWidth={1}
+            />
           </MapView>
           <View style={styles.bottom}>
-            <Text style={[styles.coordinates]}>{isLoading ? '?-????-????' : this.getFormattedCoordinates() }</Text>
+            <Text style={[styles.coordinates]}>{!isLoading ? this.getFormattedGeoHash() : '?-????-????'}</Text>
           </View>
           </View>
-          
       </View>
     );
 	}
