@@ -1,20 +1,25 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Alert } from 'react-native';
-import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import { StyleSheet, Text, View, Alert, ToastAndroid, Platform, AlertIOS, } from 'react-native';
+import MapView, { PROVIDER_GOOGLE, Marker, Callout, Circle } from 'react-native-maps';
 import Geohash from 'latlon-geohash'
 
-const latitudeDelta = 0.000922;
+const latitudeDelta = 0.00122;
 const longitudeDelta = 0.000421;
+const defaultAccuracy = 4.7;
 
 export default class App extends Component {
+  temp = {
+    lastLatitudeDelta: latitudeDelta,
+    lastLongitudeDelta: longitudeDelta,
+  };
+
   state = {
-		region: {
       latitude: 37.78825,
       longitude: -122.4324,
       latitudeDelta,
-      longitudeDelta
-    },
-    isLoading: false
+      longitudeDelta,
+      isLoading: false,
+      accuracy: defaultAccuracy
 	};
 
 	findCoordinates() {
@@ -22,13 +27,10 @@ export default class App extends Component {
 		navigator.geolocation.getCurrentPosition(
 			position => {
 				this.setState({
-          region: {
-            latitude: this.round(position.coords.latitude) ,
-            longitude: this.round(position.coords.longitude),
-            latitudeDelta,
-            longitudeDelta
-          },
-          isLoading: false
+          latitude: this.round(position.coords.latitude) ,
+          longitude: this.round(position.coords.longitude),
+          isLoading: false,
+          accuracy: position.coords.accuracy
         });
 			},
 			error => Alert.alert(error.message),
@@ -44,36 +46,60 @@ export default class App extends Component {
     return Number(parseFloat(coordinate).toFixed(5));
   }
 
+  getFormattedCoordinates(){
+    return Geohash.encode(this.state.latitude, this.state.longitude, 9).toUpperCase().replace(/(.{1})(.{4})(.{4})/gi, "$1-$2-$3");
+  }
+
 	render() {
 
     const isLoading = this.state.isLoading;
 		return (
       <View style={styles.container}>
+        <View style={styles.map}>
         <MapView
           provider={PROVIDER_GOOGLE}
-          region={this.state.region}
-          style={StyleSheet.absoluteFill}
+          region={this.state}
+          style={[StyleSheet.absoluteFill]}
           onLongPress={() => {this.findCoordinates()}}
+          onRegionChangeComplete={(e)=>{
+            this.temp.lastLatitudeDelta = this.round(e.latitudeDelta);
+            this.temp.lastLongitudeDelta = this.round(e.longitudeDelta);
+          }}
         >
           <Marker draggable
             coordinate={{
-              latitude: this.state.region.latitude,
-              longitude: this.state.region.longitude,
+              latitude: this.state.latitude,
+              longitude: this.state.longitude,
             }}
-            centerOffset={{ x: -18, y: -60 }}
-            anchor={{ x: 0.69, y: 1 }}
-            image={require('./img/map-marker.png')}
-            onDragEnd={(e) => this.setState({ region: {
+            anchor={{ x: 0.5, y: 0.9 }}
+            image={isLoading ? require('./img/target_question.png') : require('./img/target.png')}
+            onDrag={()=>{this.setState({isLoading:true})}}
+            onDragEnd={(e) => this.setState({
               latitude : this.round(e.nativeEvent.coordinate.latitude),
               longitude: this.round(e.nativeEvent.coordinate.longitude),
-              latitudeDelta,
-              longitudeDelta
-            }
-            })}
-          >
+              latitudeDelta: this.temp.lastLatitudeDelta,
+              longitudeDelta: this.temp.lastLongitudeDelta,
+              accuracy: defaultAccuracy,
+              isLoading: false
+              })}>
+              <Callout>
+                <Text>Precision: {this.state.accuracy}m{'\u00B2'}</Text> 
+              </Callout>
           </Marker>
+          <Circle
+            center={this.state}
+            radius={this.state.accuracy}
+            fillColor="rgba(138, 195, 214, 0.4)"
+            strokeColor="rgba(44, 104, 125, 0.5)"
+            zIndex={2}
+            strokeWidth={2}
+          />
           </MapView>
-        <Text style={ styles.welcome}>{isLoading ? 'Loading ...' : Geohash.encode(this.state.region.latitude, this.state.region.longitude, 9).toUpperCase().replace(/(.{1})(.{4})(.{4})/gi, "$1-$2-$3") }</Text>
+          <View style={styles.bottom}>
+            <Text style={[styles.coordinates]}>{isLoading ? '?-????-????' : this.getFormattedCoordinates() }</Text>
+          </View>
+          </View>
+          
       </View>
     );
 	}
@@ -82,19 +108,21 @@ export default class App extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
-  welcome: {
+  coordinates: {
     fontSize: 25,
     textAlign: 'center',
-    margin: 10,
     fontWeight: 'bold'
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+  bottom: {
+    position: 'absolute',
+    bottom:65,
+    backgroundColor: 'rgba(255,255,255, 0.8)',
+    width: '100%',
+    height: 40
   },
+  map: {
+    flex: 18
+  }
 });
