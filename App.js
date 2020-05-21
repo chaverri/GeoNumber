@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Alert} from 'react-native';
+import { StyleSheet, Text, TextInput, View, Alert} from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker, Callout, Circle, Polygon } from 'react-native-maps';
 import Geohash from 'latlon-geohash'
 
@@ -19,7 +19,8 @@ export default class App extends Component {
       latitudeDelta,
       longitudeDelta,
       isLoading: false,
-      accuracy: defaultAccuracy
+      accuracy: defaultAccuracy,
+      currentGeohash:''
 	};
 
 	findCoordinates() {
@@ -30,7 +31,8 @@ export default class App extends Component {
           latitude: this.round(position.coords.latitude),
           longitude: this.round(position.coords.longitude),
           isLoading: false,
-          accuracy: Number(position.coords.accuracy.toFixed(0))
+          accuracy: Number(position.coords.accuracy.toFixed(0)),
+          currentGeohash: this.getGeoHash(position.coords)
         });
 			},
 			error => Alert.alert(error.message),
@@ -54,8 +56,20 @@ export default class App extends Component {
     }
   }
 
+  getGeoHash(coordinates){
+    try{
+      return Geohash.encode(coordinates.latitude, coordinates.longitude, 9);
+    }catch(error){
+      return null;
+    }
+  }
+
+  refreshGeohash(){
+    this.setState({currentGeohash : this.getCurrentGeoHash()});
+  }
+
   getFormattedGeoHash(){
-      let geohash = this.getCurrentGeoHash();
+      let geohash = this.state.currentGeohash;
       return geohash ? geohash.toUpperCase().replace(/(.{1})(.{4})(.{4})/gi, "$1-$2-$3") : '?-????-????';
   }
 
@@ -122,14 +136,20 @@ export default class App extends Component {
             onDragStart={()=>{this.setState({latitudeDelta: this.temp.lastLatitudeDelta,
               longitudeDelta: this.temp.lastLongitudeDelta});}}
             onDrag={()=>{this.setState({isLoading:true})}}
-            onDragEnd={(e) => this.setState({
-              latitude : this.round(e.nativeEvent.coordinate.latitude),
-              longitude: this.round(e.nativeEvent.coordinate.longitude),
-              latitudeDelta: this.temp.lastLatitudeDelta,
-              longitudeDelta: this.temp.lastLongitudeDelta,
-              accuracy: defaultAccuracy,
-              isLoading: false,
-              tracksViewChanges: false
+            onDragEnd={(e) => 
+
+              this.setState({
+                latitude : this.round(e.nativeEvent.coordinate.latitude),
+                longitude: this.round(e.nativeEvent.coordinate.longitude),
+                latitudeDelta: this.temp.lastLatitudeDelta,
+                longitudeDelta: this.temp.lastLongitudeDelta,
+                accuracy: defaultAccuracy,
+                isLoading: false,
+                tracksViewChanges: false,
+                currentGeohash : this.getCurrentGeoHash({ 
+                  latitude: this.round(e.nativeEvent.coordinate.latitude),
+                  longitude: this.round(e.nativeEvent.coordinate.longitude)
+                })
               })}>
               <Callout>
                 <Text>Precisión GPS: {this.state.accuracy}m{'\u00B2'}</Text> 
@@ -150,7 +170,9 @@ export default class App extends Component {
             />
           </MapView>
           <View style={styles.bottom}>
-            <Text style={[styles.coordinates]}>{!isLoading ? this.getFormattedGeoHash() : '?-????-????'}</Text>
+            <Text style={[styles.coordinates]}>
+              {!isLoading ? this.getFormattedGeoHash() : '?-????-????'}
+            </Text>
           </View>
           </View>
       </View>
@@ -170,7 +192,7 @@ const styles = StyleSheet.create({
   },
   bottom: {
     position: 'absolute',
-    bottom:65,
+    top:85,
     backgroundColor: 'rgba(255,255,255, 0.8)',
     width: '100%',
     height: 40
