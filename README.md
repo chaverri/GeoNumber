@@ -16,5 +16,7 @@
 
 ## Dependencies:
 
+* latlon-geohash (https://github.com/chrisveness/latlon-geohash)
 * react-native-maps (https://github.com/react-native-community/react-native-maps)
 * react-native-modal-overlay (https://github.com/rgabs/react-native-modal-overlay)
+* react-native-elements (https://react-native-elements.github.io/react-native-elements/)
