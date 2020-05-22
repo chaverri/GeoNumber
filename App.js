@@ -7,6 +7,7 @@ import {
   Alert,
   Linking,
   Platform,
+  Share,
 } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
@@ -284,7 +285,11 @@ export default class App extends Component {
               type="font-awesome"
               color="#000"
               size={25}
-              onPress={() => {}}
+              onPress={() => {
+                Share.share({
+                  message: `Geohash: ${this.getFormattedGeoHash()}`,
+                });
+              }}
             />
 
             <Icon
