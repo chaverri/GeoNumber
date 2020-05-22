@@ -6,6 +6,7 @@ import {
   View,
   Alert,
   Linking,
+  Platform,
 } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
@@ -132,6 +133,33 @@ export default class App extends Component {
   openModal = () => this.setState({ modalVisible: true });
 
   onModalClose = () => this.setState({ modalVisible: false });
+
+  openInMap() {
+    const scheme = Platform.select({
+      ios: "maps:0,0?q=",
+      android: "geo:0,0?q=",
+    });
+    const latLng = `${this.state.latitude},${this.state.longitude}`;
+    const label = this.getFormattedGeoHash();
+    const url = Platform.select({
+      ios: `${scheme}${label}@${latLng}`,
+      android: `${scheme}${latLng}(${label})`,
+    });
+
+    let browser_url = `https://www.google.com/maps/search/?api=1&query=${this.state.latitude},${this.state.longitude}`;
+
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (supported) {
+          return Linking.openURL(url);
+        } else {
+          return Linking.openURL(browser_url);
+        }
+      })
+      .catch((error) => {
+        return Linking.openURL(browser_url);
+      });
+  }
 
   render() {
     const isLoading = this.state.isLoading;
@@ -267,8 +295,7 @@ export default class App extends Component {
               color="#000"
               size={25}
               onPress={() => {
-                let url = `https://www.google.com/maps/search/?api=1&query=${this.state.latitude},${this.state.longitude}`;
-                Linking.openURL(url);
+                this.openInMap();
               }}
             />
           </View>
