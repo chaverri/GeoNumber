@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, TextInput, View, Alert} from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker, Callout, Circle, Polygon } from 'react-native-maps';
+import Overlay from 'react-native-modal-overlay';
 import Geohash from 'latlon-geohash'
 
 const latitudeDelta = 0.00122;
@@ -20,7 +21,8 @@ export default class App extends Component {
       longitudeDelta,
       isLoading: false,
       accuracy: defaultAccuracy,
-      currentGeohash:''
+      currentGeohash:'',
+      modalVisible: false
 	};
 
 	findCoordinates() {
@@ -110,6 +112,10 @@ export default class App extends Component {
     return polygonBounds;
   }
 
+  openModal = () => this.setState({ modalVisible: true});
+
+  onModalClose = () => this.setState({ modalVisible: false});
+
 	render() {
 
     const isLoading = this.state.isLoading;
@@ -150,31 +156,35 @@ export default class App extends Component {
                   latitude: this.round(e.nativeEvent.coordinate.latitude),
                   longitude: this.round(e.nativeEvent.coordinate.longitude)
                 })
-              })}>
-              <Callout>
-                <Text>Precisión GPS: {this.state.accuracy}m{'\u00B2'}</Text> 
-              </Callout>
+              })}
+              >
+                <Callout>
+                  <Text>{'Precisión GPS: ' + (this.state.accuracy == 0 ? 'N/A' : this.state.accuracy  + 'm\u00B2') + '\nLatitud: ' + this.state.latitude + '\nLongitud: ' + this.state.longitude}</Text>
+                </Callout>
           </Marker>
           <Circle
             center={this.state}
             radius={this.state.accuracy}
-            fillColor="rgba(138, 195, 214, 0.4)"
-            strokeColor="rgba(44, 104, 125, 0.5)"
-            strokeWidth={1}
+            fillColor="#99ebfa26"
+            strokeColor="#000000"
+            strokeWidth={2}
           />
           <Polygon
               coordinates={this.getPolygonBounds()}
-              strokeColor="rgba(255,0,0,0.5)"
-              fillColor="rgba(255,0,0,0.2)"
-              strokeWidth={1}
+              strokeColor="#000000"
+              fillColor="#ff7d9666"
+              strokeWidth={2}
             />
           </MapView>
           <View style={styles.bottom}>
-            <Text style={[styles.coordinates]}>
+            <Text style={[styles.coordinates]} onPress={this.openModal}>
               {!isLoading ? this.getFormattedGeoHash() : '?-????-????'}
             </Text>
           </View>
           </View>
+          <Overlay visible={this.state.modalVisible} onClose={this.onModalClose} closeOnTouchOutside>
+            <TextInput defaultValue={this.getFormattedGeoHash()}></TextInput>
+          </Overlay>
       </View>
     );
 	}
