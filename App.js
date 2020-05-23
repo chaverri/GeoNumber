@@ -40,6 +40,8 @@ export default class App extends Component {
     accuracy: defaultAccuracy,
     currentGeohash: "",
     modalVisible: false,
+    geohashErrorVisible: false,
+    geohashInput: "",
   };
 
   findCoordinates() {
@@ -83,15 +85,26 @@ export default class App extends Component {
     }
   }
 
-  refreshGeohash() {
-    this.setState({ currentGeohash: this.getCurrentGeoHash() });
-  }
-
   getFormattedGeoHash() {
     let geohash = this.state.currentGeohash;
     return geohash
       ? geohash.toUpperCase().replace(/(.{1})(.{4})(.{4})/gi, "$1-$2-$3")
       : "?-????-????";
+  }
+
+  cleanGeohash(geohash) {
+    return (
+      geohash && geohash.trim().replace(/-/g, "").toLowerCase().slice(0, 9)
+    );
+  }
+
+  tryToParseGeohash(geohash) {
+    let coordinates = null;
+    try {
+      coordinates = Geohash.decode(geohash);
+    } catch (e) {}
+
+    return coordinates;
   }
 
   getPolygonBounds() {
@@ -131,7 +144,12 @@ export default class App extends Component {
     return polygonBounds;
   }
 
-  openModal = () => this.setState({ modalVisible: true });
+  openModal = () => {
+    this.setState({
+      modalVisible: true,
+      geohashInput: this.getFormattedGeoHash(),
+    });
+  };
 
   onModalClose = () => this.setState({ modalVisible: false });
 
@@ -160,6 +178,18 @@ export default class App extends Component {
       .catch((error) => {
         return Linking.openURL(browser_url);
       });
+  }
+
+  showError() {
+    this.setState({
+      geohashErrorVisible: true,
+    });
+  }
+
+  hideError() {
+    this.setState({
+      geohashErrorVisible: false,
+    });
   }
 
   render() {
@@ -264,6 +294,8 @@ export default class App extends Component {
             <TextInput
               style={styles.hashInput}
               defaultValue={this.getFormattedGeoHash()}
+              onChangeText={(value) => this.setState({ geohashInput: value })}
+              value={this.state.geohashInput}
             ></TextInput>
             <Button
               icon={
@@ -275,14 +307,52 @@ export default class App extends Component {
                 />
               }
               buttonStyle={{ backgroundColor: "black" }}
+              onPress={() => {
+                this.hideError();
+                let cleanGeohash = this.cleanGeohash(this.state.geohashInput);
+                let parsedGeoHash = this.tryToParseGeohash(cleanGeohash);
+
+                if (parsedGeoHash != null && cleanGeohash.length == 9) {
+                  this.setState({
+                    latitude: parsedGeoHash.lat,
+                    longitude: parsedGeoHash.lon,
+                    accuracy: defaultAccuracy,
+                    modalVisible: false,
+                    currentGeohash: cleanGeohash,
+                  });
+                } else {
+                  this.showError();
+                }
+              }}
             />
           </View>
-          <View style={{ flexDirection: "row" }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "flex-start",
+              width: "100%",
+              borderWidth: 1,
+              borderColor: "#b02944",
+              display: this.state.geohashErrorVisible == true ? "flex" : "none",
+            }}
+          >
+            <Icon
+              type="font-awesome-5"
+              name="exclamation-circle"
+              color="#b02944"
+              size={20}
+              style={{ margin: 4 }}
+            />
+            <Text style={{ margin: 4, color: "#b02944", fontWeight: "bold" }}>
+              No se pudo reconocer el geohash.
+            </Text>
+          </View>
+          <View style={styles.row}>
             <Icon
               reverse
               raised
-              name="share-square"
-              type="font-awesome"
+              name="share-alt"
+              type="font-awesome-5"
               color="#000"
               size={25}
               onPress={() => {
@@ -295,8 +365,8 @@ export default class App extends Component {
             <Icon
               reverse
               raised
-              name="external-link"
-              type="font-awesome"
+              name="external-link-alt"
+              type="font-awesome-5"
               color="#000"
               size={25}
               onPress={() => {
@@ -339,5 +409,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 40,
     width: "90%",
+  },
+  row: {
+    flexDirection: "row",
   },
 });
