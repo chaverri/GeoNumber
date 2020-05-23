@@ -12,6 +12,14 @@
     ],
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "android": {
+      "package": "com.materealize.geohash",
+      "versionCode": 1
+    },
+    "ios": {
+      "bundleIdentifier": "com.materealize.geohash",
+      "buildNumber": "1.0.0"
+    },
   }
 }
