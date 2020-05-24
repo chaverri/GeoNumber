@@ -2,9 +2,10 @@
   "name": "geohash",
   "displayName": "geohash",
   "expo": {
-    "name": "geohash",
-    "slug": "geohash",
+    "name": "Geohash",
+    "icon": "img/geohash_logo.png",
     "version": "1.0.0",
+    "slug": "geohash",
     "platforms": [
       "ios",
       "android",
@@ -20,6 +21,6 @@
     "ios": {
       "bundleIdentifier": "com.materealize.geohash",
       "buildNumber": "1.0.0"
-    },
+    }
   }
 }
