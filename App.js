@@ -8,6 +8,7 @@ import {
   Linking,
   Platform,
   Share,
+  Image
 } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
@@ -217,11 +218,6 @@ export default class App extends Component {
                 longitude: this.state.longitude,
               }}
               anchor={{ x: 0.5, y: 0.9 }}
-              image={
-                isLoading
-                  ? require("./img/target_question.png")
-                  : require("./img/target.png")
-              }
               onDragStart={() => {
                 this.setState({
                   latitudeDelta: this.temp.lastLatitudeDelta,
@@ -247,6 +243,11 @@ export default class App extends Component {
                 })
               }
             >
+              <Image source={
+                isLoading
+                  ? require("./img/target_question.png")
+                  : require("./img/target.png")
+              } style={{height: 64, width:64 }} />
               <Callout>
                 <Text>
                   {"Precisión GPS: " +
