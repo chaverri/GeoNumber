@@ -47,6 +47,10 @@ target 'geohash' do
   pod 'GoogleMaps'
   pod 'Google-Maps-iOS-Utils'
 
+
   # react-native-cli autolinking
   use_native_modules!
+  
+
+
 end

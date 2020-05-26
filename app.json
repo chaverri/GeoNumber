@@ -4,7 +4,7 @@
   "expo": {
     "name": "Geohash",
     "icon": "img/geohash_logo.png",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "slug": "geohash",
     "platforms": [
       "ios",
@@ -20,7 +20,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.materealize.geohash",
-      "buildNumber": "1.0.0"
+      "buildNumber": "0.0.1"
     }
   }
 }

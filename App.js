@@ -19,6 +19,7 @@ import MapView, {
 import Overlay from "react-native-modal-overlay";
 import { Icon } from "react-native-elements";
 import { Button } from "react-native-elements";
+//import Geolocation from '@react-native-community/geolocation';
 import Geohash from "latlon-geohash";
 
 const latitudeDelta = 0.00122;

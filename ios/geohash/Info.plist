@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>0.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
@@ -25,7 +25,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string></string>
+	<string>Allow geohash to use your location</string>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -41,12 +41,11 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Allow geohash to use your location</string>
 	<key>NSAppTransportSecurity</key>
-	<!--See http://ste.vn/2015/06/10/configuring-app-transport-security-ios-9-osx-10-11/ -->
 	<dict>
-    <key>NSAllowsArbitraryLoads</key>
-    <true/>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
 			<key>localhost</key>
@@ -64,18 +63,16 @@
 	<string>Allow geohash experiences to access your contacts</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Allow geohash to use your location</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Allow geohash to use your location</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Allow geohash to use your location</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow geohash to access your microphone</string>
 	<key>NSMotionUsageDescription</key>
-	<string>Allow geohash to access your device's accelerometer</string>
+	<string>Allow geohash to access your device&apos;s accelerometer</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Give geohash periences permission to save photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Give geohash periences permission to access your photos</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSRemindersUsageDescription</key>
 	<string>Allow geohash to access your reminders</string>
 </dict>
