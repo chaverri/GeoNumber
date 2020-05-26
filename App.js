@@ -410,6 +410,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 40,
     width: "90%",
+    textAlignVertical: "center",
+    paddingTop: 0,
+    paddingBottom: 0
   },
   row: {
     flexDirection: "row",

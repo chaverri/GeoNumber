@@ -4,23 +4,34 @@
   "expo": {
     "name": "Geohash",
     "icon": "img/geohash_logo.png",
+    "splash": {
+      "image": "img/geohash_logo.png",
+      "resizeMode": "contain"
+    },
     "version": "0.0.1",
     "slug": "geohash",
     "platforms": [
       "ios",
-      "android",
-      "web"
+      "android"
     ],
     "assetBundlePatterns": [
       "**/*"
     ],
     "android": {
       "package": "com.materealize.geohash",
-      "versionCode": 1
+      "versionCode": 1,
+      "splash": {
+        "image": "img/geohash_logo.png",
+        "resizeMode": "contain"
+      }
     },
     "ios": {
       "bundleIdentifier": "com.materealize.geohash",
-      "buildNumber": "0.0.1"
+      "buildNumber": "0.0.1",
+      "splash": {
+        "image": "img/geohash_logo.png",
+        "resizeMode": "contain"
+      }
     }
   }
 }
