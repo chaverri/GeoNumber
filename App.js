@@ -247,7 +247,7 @@ export default class App extends Component {
                 isLoading
                   ? require("./img/target_question.png")
                   : require("./img/target.png")
-              } style={{height: 64, width:64 }} />
+              } style={{height: 100, width:100 }} />
               <Callout>
                 <Text>
                   {"Precisión GPS: " +
@@ -298,6 +298,7 @@ export default class App extends Component {
               defaultValue={this.getFormattedGeoHash()}
               onChangeText={(value) => this.setState({ geohashInput: value })}
               value={this.state.geohashInput}
+              maxLength={15}
             ></TextInput>
             <Button
               icon={
@@ -413,7 +414,8 @@ const styles = StyleSheet.create({
     width: "90%",
     textAlignVertical: "center",
     paddingTop: 0,
-    paddingBottom: 0
+    paddingBottom: 0,
+    color: '#000'
   },
   row: {
     flexDirection: "row",

@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "splashscreen.png",
+      "filename" : "geohash_logo_128.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "geohash_logo_256.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "geohash_logo.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
