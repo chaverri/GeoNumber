@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,7 +8,7 @@ import {
   Linking,
   Platform,
   Share,
-  Image
+  Image,
 } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
@@ -18,370 +18,22 @@ import MapView, {
   Polygon,
 } from "react-native-maps";
 import Overlay from "react-native-modal-overlay";
-import { Icon } from "react-native-elements";
-import { Button } from "react-native-elements";
-import Geolocation from '@react-native-community/geolocation';
+import { Icon, Button } from "react-native-elements";
+import Geolocation from "@react-native-community/geolocation";
 import Geohash from "latlon-geohash";
 
-const latitudeDelta = 0.00122;
-const longitudeDelta = 0.000421;
+const defaultLatitudeDelta = 0.00122;
+const defaultLongitudeDelta = 0.000421;
 const defaultAccuracy = 0;
+const unknownGeohash = "?-????-????";
+const geolocationOptions = {
+  enableHighAccuracy: true,
+  timeout: 20000,
+  maximumAge: 0,
+};
 
-export default class App extends Component {
-  temp = {
-    lastLatitudeDelta: latitudeDelta,
-    lastLongitudeDelta: longitudeDelta,
-  };
-
-  state = {
-    latitude: 40.75796,
-    longitude: -73.985563,
-    latitudeDelta,
-    longitudeDelta,
-    isLoading: false,
-    accuracy: defaultAccuracy,
-    currentGeohash: "",
-    modalVisible: false,
-    geohashErrorVisible: false,
-    geohashInput: "",
-  };
-
-  findCoordinates() {
-    this.setState({ isLoading: true });
-    Geolocation.getCurrentPosition(
-      (position) => {
-        this.setState({
-          latitude: this.round(position.coords.latitude),
-          longitude: this.round(position.coords.longitude),
-          isLoading: false,
-          accuracy: Number(position.coords.accuracy.toFixed(0)),
-          currentGeohash: this.getGeoHash(position.coords),
-        });
-      },
-      (error) => Alert.alert(error.message),
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-    );
-  }
-
-  componentDidMount() {
-    this.findCoordinates();
-  }
-
-  round(coordinate) {
-    return Number(parseFloat(coordinate).toFixed(5));
-  }
-
-  getCurrentGeoHash() {
-    try {
-      return Geohash.encode(this.state.latitude, this.state.longitude, 9);
-    } catch (error) {
-      return null;
-    }
-  }
-
-  getGeoHash(coordinates) {
-    try {
-      return Geohash.encode(coordinates.latitude, coordinates.longitude, 9);
-    } catch (error) {
-      return null;
-    }
-  }
-
-  getFormattedGeoHash() {
-    let geohash = this.state.currentGeohash;
-    return geohash
-      ? geohash.toUpperCase().replace(/(.{1})(.{4})(.{4})/gi, "$1-$2-$3")
-      : "?-????-????";
-  }
-
-  cleanGeohash(geohash) {
-    return (
-      geohash && geohash.trim().replace(/-/g, "").toLowerCase().slice(0, 9)
-    );
-  }
-
-  tryToParseGeohash(geohash) {
-    let coordinates = null;
-    try {
-      coordinates = Geohash.decode(geohash);
-    } catch (e) {}
-
-    return coordinates;
-  }
-
-  getPolygonBounds() {
-    let geohash = this.getCurrentGeoHash();
-
-    if (!geohash) {
-      return [];
-    }
-
-    let polygonBounds = [];
-    let bounds = Geohash.bounds(geohash);
-
-    //NW
-    polygonBounds.push({
-      longitude: bounds.sw.lon,
-      latitude: bounds.ne.lat,
-    });
-
-    //NE
-    polygonBounds.push({
-      latitude: bounds.ne.lat,
-      longitude: bounds.ne.lon,
-    });
-
-    //SE
-    polygonBounds.push({
-      longitude: bounds.ne.lon,
-      latitude: bounds.sw.lat,
-    });
-
-    //SW
-    polygonBounds.push({
-      latitude: bounds.sw.lat,
-      longitude: bounds.sw.lon,
-    });
-
-    return polygonBounds;
-  }
-
-  openModal = () => {
-    this.setState({
-      modalVisible: true,
-      geohashInput: this.getFormattedGeoHash(),
-    });
-  };
-
-  onModalClose = () => this.setState({ modalVisible: false });
-
-  openInMap() {
-    const scheme = Platform.select({
-      ios: "maps:0,0?q=",
-      android: "geo:0,0?q=",
-    });
-    const latLng = `${this.state.latitude},${this.state.longitude}`;
-    const label = this.getFormattedGeoHash();
-    const url = Platform.select({
-      ios: `${scheme}${label}@${latLng}`,
-      android: `${scheme}${latLng}(${label})`,
-    });
-
-    let browser_url = `https://www.google.com/maps/search/?api=1&query=${this.state.latitude},${this.state.longitude}`;
-
-    Linking.canOpenURL(url)
-      .then((supported) => {
-        if (supported) {
-          return Linking.openURL(url);
-        } else {
-          return Linking.openURL(browser_url);
-        }
-      })
-      .catch((error) => {
-        return Linking.openURL(browser_url);
-      });
-  }
-
-  showError() {
-    this.setState({
-      geohashErrorVisible: true,
-    });
-  }
-
-  hideError() {
-    this.setState({
-      geohashErrorVisible: false,
-    });
-  }
-
-  render() {
-    const isLoading = this.state.isLoading;
-    return (
-      <View style={styles.container}>
-        <View style={styles.map}>
-          <MapView
-            provider={PROVIDER_GOOGLE}
-            region={this.state}
-            style={[StyleSheet.absoluteFill]}
-            onLongPress={() => {
-              this.findCoordinates();
-            }}
-            onRegionChangeComplete={(e) => {
-              this.temp.lastLatitudeDelta = this.round(e.latitudeDelta);
-              this.temp.lastLongitudeDelta = this.round(e.longitudeDelta);
-            }}
-          >
-            <Marker
-              draggable
-              coordinate={{
-                latitude: this.state.latitude,
-                longitude: this.state.longitude,
-              }}
-              anchor={{ x: 0.5, y: 0.9 }}
-              onDragStart={() => {
-                this.setState({
-                  latitudeDelta: this.temp.lastLatitudeDelta,
-                  longitudeDelta: this.temp.lastLongitudeDelta,
-                });
-              }}
-              onDrag={() => {
-                this.setState({ isLoading: true });
-              }}
-              onDragEnd={(e) =>
-                this.setState({
-                  latitude: this.round(e.nativeEvent.coordinate.latitude),
-                  longitude: this.round(e.nativeEvent.coordinate.longitude),
-                  latitudeDelta: this.temp.lastLatitudeDelta,
-                  longitudeDelta: this.temp.lastLongitudeDelta,
-                  accuracy: defaultAccuracy,
-                  isLoading: false,
-                  tracksViewChanges: false,
-                  currentGeohash: this.getCurrentGeoHash({
-                    latitude: this.round(e.nativeEvent.coordinate.latitude),
-                    longitude: this.round(e.nativeEvent.coordinate.longitude),
-                  }),
-                })
-              }
-            >
-              <Image source={
-                isLoading
-                  ? require("./img/target_question.png")
-                  : require("./img/target.png")
-              } style={{height: 100, width:100 }} />
-              <Callout>
-                <Text>
-                  {"Precisión GPS: " +
-                    (this.state.accuracy == 0
-                      ? "N/A"
-                      : this.state.accuracy + "m\u00B2") +
-                    "\nLatitud: " +
-                    this.state.latitude +
-                    "\nLongitud: " +
-                    this.state.longitude}
-                </Text>
-              </Callout>
-            </Marker>
-            <Circle
-              center={this.state}
-              radius={this.state.accuracy}
-              fillColor="#99ebfa26"
-              strokeColor="#000000"
-              strokeWidth={2}
-            />
-            <Polygon
-              coordinates={this.getPolygonBounds()}
-              strokeColor="#000000"
-              fillColor="#ff7d9666"
-              strokeWidth={2}
-            />
-          </MapView>
-          <View style={styles.bottom}>
-            <Text style={[styles.coordinates]} onPress={this.openModal}>
-              {!isLoading ? this.getFormattedGeoHash() : "?-????-????"}
-            </Text>
-          </View>
-        </View>
-        <Overlay
-          visible={this.state.modalVisible}
-          onClose={this.onModalClose}
-          closeOnTouchOutside
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-          >
-            <TextInput
-              style={styles.hashInput}
-              defaultValue={this.getFormattedGeoHash()}
-              onChangeText={(value) => this.setState({ geohashInput: value })}
-              value={this.state.geohashInput}
-              maxLength={15}
-            ></TextInput>
-            <Button
-              icon={
-                <Icon
-                  type="font-awesome"
-                  name="arrow-right"
-                  color="#FFF"
-                  size={23}
-                />
-              }
-              buttonStyle={{ backgroundColor: "black" }}
-              onPress={() => {
-                this.hideError();
-                let cleanGeohash = this.cleanGeohash(this.state.geohashInput);
-                let parsedGeoHash = this.tryToParseGeohash(cleanGeohash);
-
-                if (parsedGeoHash != null && cleanGeohash.length == 9) {
-                  this.setState({
-                    latitude: parsedGeoHash.lat,
-                    longitude: parsedGeoHash.lon,
-                    accuracy: defaultAccuracy,
-                    modalVisible: false,
-                    currentGeohash: cleanGeohash,
-                  });
-                } else {
-                  this.showError();
-                }
-              }}
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "flex-start",
-              width: "100%",
-              borderWidth: 1,
-              borderColor: "#b02944",
-              display: this.state.geohashErrorVisible == true ? "flex" : "none",
-            }}
-          >
-            <Icon
-              type="font-awesome-5"
-              name="exclamation-circle"
-              color="#b02944"
-              size={20}
-              style={{ margin: 4 }}
-            />
-            <Text style={{ margin: 4, color: "#b02944", fontWeight: "bold" }}>
-              No se pudo reconocer el geohash.
-            </Text>
-          </View>
-          <View style={styles.row}>
-            <Icon
-              reverse
-              raised
-              name="share-alt"
-              type="font-awesome-5"
-              color="#000"
-              size={25}
-              onPress={() => {
-                Share.share({
-                  message: `Geohash: ${this.getFormattedGeoHash()}`,
-                });
-              }}
-            />
-
-            <Icon
-              reverse
-              raised
-              name="external-link-alt"
-              type="font-awesome-5"
-              color="#000"
-              size={25}
-              onPress={() => {
-                this.openInMap();
-              }}
-            />
-          </View>
-        </Overlay>
-      </View>
-    );
-  }
-}
+const markerImage = require("./img/target.png");
+const unknownMarkerImage = require("./img/target_question.png");
 
 const styles = StyleSheet.create({
   container: {
@@ -415,9 +67,379 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
     paddingTop: 0,
     paddingBottom: 0,
-    color: '#000'
+    color: "#000",
   },
   row: {
     flexDirection: "row",
   },
 });
+
+function App() {
+  let transtitiveMapDelta = {
+    lastLatitudeDelta: defaultLatitudeDelta,
+    lastLongitudeDelta: defaultLongitudeDelta,
+  };
+
+  const [mapLocation, setMapLocation] = useState({
+    latitude: 40.75796,
+    longitude: -73.985563,
+  });
+
+  const [mapLocationDelta, setMapLocationDelta] = useState({
+    latitudeDelta: defaultLatitudeDelta,
+    longitudeDelta: defaultLongitudeDelta,
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [gpsAccuracy, setGPSAccuracy] = useState(defaultAccuracy);
+
+  const [currentGeohash, setCurrentGeohash] = useState("");
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const [isHashInputValid, setIsHashInputValid] = useState(true);
+
+  const [geohashInput, setGeohashInput] = useState("");
+
+  const getGPSLocation = () => {
+    setIsLoading(true);
+
+    Geolocation.getCurrentPosition(
+      (position) => {
+        setMapLocation({
+          latitude: roundCoordinates(position.coords.latitude),
+          longitude: roundCoordinates(position.coords.longitude),
+        });
+
+        setGPSAccuracy(Number(position.coords.accuracy.toFixed(0)));
+        setCurrentGeohash(getGeoHashFromCoordinates(position.coords));
+        setIsLoading(false);
+      },
+      (error) => Alert.alert(error.message),
+      geolocationOptions
+    );
+  };
+
+  const roundCoordinates = (coordinate) => {
+    return Number(parseFloat(coordinate).toFixed(5));
+  };
+
+  const getCurrentGeoHash = () => {
+    try {
+      return Geohash.encode(mapLocation.latitude, mapLocation.longitude, 9);
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const getGeoHashFromCoordinates = (coordinates) => {
+    try {
+      return Geohash.encode(coordinates.latitude, coordinates.longitude, 9);
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const getCurrentGeoHashFormatted = () => {
+    return currentGeohash
+      ? currentGeohash.toUpperCase().replace(/(.{1})(.{4})(.{4})/gi, "$1-$2-$3")
+      : unknownGeohash;
+  };
+
+  const cleanGeohash = (geohash) => {
+    return (
+      geohash && geohash.trim().replace(/-/g, "").toLowerCase().slice(0, 9)
+    );
+  };
+
+  const parseGeohashToCoordinates = (geohash) => {
+    let coordinates = null;
+    try {
+      coordinates = Geohash.decode(geohash);
+
+      return {
+        latitude: coordinates.lat,
+        longitude: coordinates.lon,
+      };
+    } catch (e) {}
+
+    return coordinates;
+  };
+
+  const getGeohashAreaBounds = () => {
+    let geohash = getCurrentGeoHash();
+
+    if (!geohash) {
+      return [];
+    }
+
+    let polygonBounds = [];
+    let bounds = Geohash.bounds(geohash);
+
+    //NW
+    polygonBounds.push({
+      longitude: bounds.sw.lon,
+      latitude: bounds.ne.lat,
+    });
+
+    //NE
+    polygonBounds.push({
+      latitude: bounds.ne.lat,
+      longitude: bounds.ne.lon,
+    });
+
+    //SE
+    polygonBounds.push({
+      longitude: bounds.ne.lon,
+      latitude: bounds.sw.lat,
+    });
+
+    //SW
+    polygonBounds.push({
+      latitude: bounds.sw.lat,
+      longitude: bounds.sw.lon,
+    });
+
+    return polygonBounds;
+  };
+
+  const showModal = () => {
+    setIsModalVisible(true);
+    setGeohashInput(getCurrentGeoHashFormatted());
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+  };
+
+  const openInMap = () => {
+    const scheme = Platform.select({
+      ios: "maps:0,0?q=",
+      android: "geo:0,0?q=",
+    });
+
+    const latLng = `${mapLocation.latitude},${mapLocation.longitude}`;
+    const label = getCurrentGeoHashFormatted();
+    const url = Platform.select({
+      ios: `${scheme}${label}@${latLng}`,
+      android: `${scheme}${latLng}(${label})`,
+    });
+
+    let browser_url = `https://www.google.com/maps/search/?api=1&query=${mapLocation.latitude},${mapLocation.longitude}`;
+
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (supported) {
+          return Linking.openURL(url);
+        } else {
+          return Linking.openURL(browser_url);
+        }
+      })
+      .catch(() => {
+        return Linking.openURL(browser_url);
+      });
+  };
+
+  const showError = () => {
+    setIsHashInputValid(false);
+  };
+
+  const hideError = () => {
+    setIsHashInputValid(true);
+  };
+
+  useEffect(() => {
+    getGPSLocation();
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.map}>
+        <MapView
+          provider={PROVIDER_GOOGLE}
+          region={{ ...mapLocation, ...mapLocationDelta }}
+          style={[StyleSheet.absoluteFill]}
+          onLongPress={getGPSLocation}
+          onRegionChangeComplete={(region) => {
+            transtitiveMapDelta = {
+              lastLatitudeDelta: roundCoordinates(region.latitudeDelta),
+              lastLongitudeDelta: roundCoordinates(region.longitudeDelta),
+            };
+          }}
+        >
+          <Marker
+            draggable
+            coordinate={mapLocation}
+            anchor={{ x: 0.5, y: 0.9 }}
+            onDragStart={() => {
+              setMapLocationDelta({
+                latitudeDelta: transtitiveMapDelta.lastLatitudeDelta,
+                longitudeDelta: transtitiveMapDelta.lastLongitudeDelta,
+              });
+            }}
+            onDrag={() => {
+              setIsLoading(true);
+            }}
+            onDragEnd={(e) => {
+              setMapLocation({
+                latitude: roundCoordinates(e.nativeEvent.coordinate.latitude),
+                longitude: roundCoordinates(e.nativeEvent.coordinate.longitude),
+              });
+
+              setMapLocationDelta({
+                latitudeDelta: transtitiveMapDelta.lastLatitudeDelta,
+                longitudeDelta: transtitiveMapDelta.lastLongitudeDelta,
+              });
+
+              setGPSAccuracy(defaultAccuracy);
+              setCurrentGeohash(
+                getGeoHashFromCoordinates({
+                  latitude: roundCoordinates(e.nativeEvent.coordinate.latitude),
+                  longitude: roundCoordinates(
+                    e.nativeEvent.coordinate.longitude
+                  ),
+                })
+              );
+              setIsLoading(false);
+            }}
+          >
+            <Image
+              source={isLoading ? unknownMarkerImage : markerImage}
+              style={{ height: 100, width: 100 }}
+            />
+            <Callout>
+              <Text>
+                {"Precisión GPS: " +
+                  (gpsAccuracy == 0 ? "N/A" : gpsAccuracy + "m\u00B2") +
+                  "\nLatitud: " +
+                  mapLocation.latitude +
+                  "\nLongitud: " +
+                  mapLocation.longitude}
+              </Text>
+            </Callout>
+          </Marker>
+          <Circle
+            center={mapLocation}
+            radius={gpsAccuracy}
+            fillColor="#99ebfa26"
+            strokeColor="#000000"
+            strokeWidth={2}
+          />
+          <Polygon
+            coordinates={getGeohashAreaBounds()}
+            strokeColor="#000000"
+            fillColor="#ff7d9666"
+            strokeWidth={2}
+          />
+        </MapView>
+        <View style={styles.bottom}>
+          <Text style={[styles.coordinates]} onPress={showModal}>
+            {!isLoading ? getCurrentGeoHashFormatted() : unknownGeohash}
+          </Text>
+        </View>
+      </View>
+      <Overlay
+        visible={isModalVisible}
+        onClose={closeModal}
+        closeOnTouchOutside
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          <TextInput
+            style={styles.hashInput}
+            defaultValue={getCurrentGeoHashFormatted()}
+            onChangeText={(value) => setGeohashInput(value)}
+            value={geohashInput}
+            maxLength={15}
+          ></TextInput>
+          <Button
+            icon={
+              <Icon
+                type="font-awesome"
+                name="arrow-right"
+                color="#FFF"
+                size={23}
+              />
+            }
+            buttonStyle={{ backgroundColor: "black" }}
+            onPress={() => {
+              hideError();
+              let cleanedGeohash = cleanGeohash(geohashInput);
+              let parsedGeoHash = parseGeohashToCoordinates(cleanedGeohash);
+
+              if (parsedGeoHash != null && cleanedGeohash.length == 9) {
+                setMapLocation({
+                  latitude: parsedGeoHash.latitude,
+                  longitude: parsedGeoHash.longitude,
+                });
+
+                setGPSAccuracy(defaultAccuracy);
+                setCurrentGeohash(cleanedGeohash);
+                setIsModalVisible(false);
+              } else {
+                showError();
+              }
+            }}
+          />
+        </View>
+        {/*Error message view --> */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "flex-start",
+            width: "100%",
+            borderWidth: 1,
+            borderColor: "#b02944",
+            display: isHashInputValid ? "none" : "flex",
+          }}
+        >
+          <Icon
+            type="font-awesome-5"
+            name="exclamation-circle"
+            color="#b02944"
+            size={20}
+            style={{ margin: 4 }}
+          />
+          <Text style={{ margin: 4, color: "#b02944", fontWeight: "bold" }}>
+            No se pudo reconocer el geohash.
+          </Text>
+        </View>
+        {/*Modal buttons view --> */}
+        <View style={styles.row}>
+          <Icon
+            reverse
+            raised
+            name="share-alt"
+            type="font-awesome-5"
+            color="#000"
+            size={25}
+            onPress={() => {
+              Share.share({
+                message: `Geohash: ${getCurrentGeoHashFormatted()}`,
+              });
+            }}
+          />
+          <Icon
+            reverse
+            raised
+            name="external-link-alt"
+            type="font-awesome-5"
+            color="#000"
+            size={25}
+            onPress={() => {
+              openInMap();
+            }}
+          />
+        </View>
+      </Overlay>
+    </View>
+  );
+}
+
+export default App;
