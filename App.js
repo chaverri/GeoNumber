@@ -20,6 +20,7 @@ import Overlay from "react-native-modal-overlay";
 import { Icon, Button } from "react-native-elements";
 import Geolocation from "@react-native-community/geolocation";
 import Geohash from "latlon-geohash";
+import Geocoding from "./Geocoding";
 import Styles from "./styles/Style";
 
 const defaultLatitudeDelta = 0.00122;
@@ -37,6 +38,7 @@ const geolocationOptions = {
 
 const markerImage = require("./img/target.png");
 const unknownMarkerImage = require("./img/target_question.png");
+let lastGeocodeQuery = null;
 
 function App() {
   let transtitiveMapDelta = {
@@ -58,6 +60,7 @@ function App() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isHashInputValid, setIsHashInputValid] = useState(true);
   const [geohashInput, setGeohashInput] = useState("");
+  const [formattedAddress, setFormattedAddress] = useState(null);
 
   const getGPSLocation = () => {
     setIsLoading(true);
@@ -172,7 +175,10 @@ function App() {
 
   const showModal = () => {
     setIsModalVisible(true);
+    hideInputError();
     setGeohashInput(getCurrentGeoHashFormatted());
+
+    refreshFormattedAddress();
   };
 
   const closeModal = () => {
@@ -192,7 +198,9 @@ function App() {
       android: `${scheme}${latLng}(${label})`,
     });
 
-    let browser_url = `https://www.google.com/maps/search/?api=1&query=${mapLocation.latitude},${mapLocation.longitude}`;
+    let browser_url = `https://www.google.com/maps/search/?api=1&query=${getCoordiantesAsString(
+      mapLocation
+    )}`;
 
     Linking.canOpenURL(url)
       .then((supported) => {
@@ -208,11 +216,34 @@ function App() {
   };
 
   const showInputError = () => {
+    setFormattedAddress(null);
     setIsHashInputValid(false);
   };
 
   const hideInputError = () => {
     setIsHashInputValid(true);
+  };
+
+  const getCoordiantesAsString = (coordinates) => {
+    return `${coordinates.latitude},${coordinates.longitude}`;
+  };
+
+  const refreshFormattedAddress = () => {
+    let currentLocationAsString = getCoordiantesAsString(mapLocation);
+    if (lastGeocodeQuery === currentLocationAsString) {
+      return;
+    }
+
+    lastGeocodeQuery = currentLocationAsString;
+    setFormattedAddress(null);
+
+    Geocoding.getFormattedAddress(mapLocation)
+      .then((formattedAddressFromAPI) =>
+        setFormattedAddress(formattedAddressFromAPI)
+      )
+      .catch(() => {
+        setFormattedAddress(null);
+      });
   };
 
   useEffect(() => {
@@ -266,11 +297,13 @@ function App() {
               source={isLoading ? unknownMarkerImage : markerImage}
               style={Styles.mapMarker}
             />
-            <Callout style={{ width: 150}}>
+            <Callout style={{ width: 155 }}>
               <Text>
                 {`Latitude: ${mapLocation.latitude}` +
                   `\nLongitude: ${mapLocation.longitude}` +
-                  (gpsAccuracy > 0 ? `\nAccuracy:   ${gpsAccuracy} m\u00B2` : "")}
+                  (gpsAccuracy > 0
+                    ? `\nAccuracy:   ${gpsAccuracy} m\u00B2`
+                    : "")}
               </Text>
             </Callout>
           </Marker>
@@ -327,8 +360,8 @@ function App() {
                 cleanedGeohash.length == hashPrecision
               ) {
                 setMapLocation({
-                  latitude: parsedGeoHash.latitude,
-                  longitude: parsedGeoHash.longitude,
+                  latitude: roundCoordinates(parsedGeoHash.latitude),
+                  longitude: roundCoordinates(parsedGeoHash.longitude),
                 });
 
                 setGPSAccuracy(defaultAccuracy);
@@ -339,6 +372,15 @@ function App() {
               }
             }}
           />
+        </View>
+        {/*Formatted address view --> */}
+        <View
+          style={{
+            ...Styles.formattedAddress,
+            display: formattedAddress ? "flex" : "none",
+          }}
+        >
+          <Text>{formattedAddress}</Text>
         </View>
         {/*Error message view --> */}
         <View
@@ -367,7 +409,7 @@ function App() {
             size={25}
             onPress={() => {
               Share.share({
-                message: `Geohash: ${getCurrentGeoHashFormatted()}`,
+                message: `${getCurrentGeoHashFormatted()}\n${formattedAddress}`,
               });
             }}
           />

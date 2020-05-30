@@ -54,6 +54,12 @@ export default StyleSheet.create({
     borderWidth: 1,
     borderColor: "#b02944",
   },
+  formattedAddress: {
+    flexDirection: "row",
+    justifyContent: "center",
+    width: "100%",
+    color: "#000"
+  },
   hashInputErrorMessage: { margin: 4, color: "#b02944", fontWeight: "bold" },
   hashInputErrorIcon: { margin: 4 }
 });
