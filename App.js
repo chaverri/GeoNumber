@@ -8,6 +8,7 @@ import {
   Platform,
   Share,
   Image,
+  PermissionsAndroid
 } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
@@ -62,6 +63,30 @@ function App() {
   const [geohashInput, setGeohashInput] = useState("");
   const [formattedAddress, setFormattedAddress] = useState(null);
 
+
+  const requestAndroidGPSPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      return granted;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  const getCurrentLocation = async () => {
+    if(Platform.OS === "android"){
+      requestAndroidGPSPermission().then((granted)=>{
+        if(granted === PermissionsAndroid.RESULTS.GRANTED){
+          getGPSLocation();
+        }
+      });
+    }else{
+      getGPSLocation();
+    }
+  }
+
   const getGPSLocation = () => {
     setIsLoading(true);
 
@@ -76,7 +101,7 @@ function App() {
         setCurrentGeohash(getGeoHashFromCoordinates(position.coords));
         setIsLoading(false);
       },
-      (error) => Alert.alert(error.message),
+      (error) => Alert.alert("No ha sido posible obtener su ubicación actual."),
       geolocationOptions
     );
   };
@@ -247,7 +272,7 @@ function App() {
   };
 
   useEffect(() => {
-    getGPSLocation();
+    getCurrentLocation();
   }, []);
 
   return (
@@ -297,12 +322,12 @@ function App() {
               source={isLoading ? unknownMarkerImage : markerImage}
               style={Styles.mapMarker}
             />
-            <Callout style={{ width: 155 }}>
+            <Callout style={{ width: 200 }}>
               <Text>
-                {`Latitude: ${mapLocation.latitude}` +
-                  `\nLongitude: ${mapLocation.longitude}` +
+                {`Latitud: ${mapLocation.latitude}` +
+                  `\nLongitud: ${mapLocation.longitude}` +
                   (gpsAccuracy > 0
-                    ? `\nAccuracy:   ${gpsAccuracy} m\u00B2`
+                    ? `\nPrecisión del GPS: ${gpsAccuracy} m\u00B2`
                     : "")}
               </Text>
             </Callout>
@@ -338,7 +363,7 @@ function App() {
             defaultValue={getCurrentGeoHashFormatted()}
             onChangeText={(value) => setGeohashInput(value)}
             value={geohashInput}
-            maxLength={15}
+            maxLength={11}
           ></TextInput>
           <Button
             icon={
@@ -352,6 +377,7 @@ function App() {
             buttonStyle={Styles.hashInputButton}
             onPress={() => {
               hideInputError();
+              setIsLoading(false);
               let cleanedGeohash = cleanGeohash(geohashInput);
               let parsedGeoHash = parseGeohashToCoordinates(cleanedGeohash);
 
@@ -396,7 +422,9 @@ function App() {
             size={20}
             style={Styles.hashInputErrorIcon}
           />
-          <Text style={Styles.hashInputErrorMessage}>Geohash is invalid</Text>
+          <Text style={Styles.hashInputErrorMessage}>
+            Código geohash no reconocido.
+          </Text>
         </View>
         {/*Modal buttons view --> */}
         <View style={Styles.row}>
