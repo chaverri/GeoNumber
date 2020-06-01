@@ -61,3 +61,6 @@ buck-out/
 # Expo
 .expo/*
 web-build/
+
+android/app/release/
+android/app/debug/
