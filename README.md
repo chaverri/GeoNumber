@@ -21,3 +21,5 @@
 * latlon-geohash (https://github.com/chrisveness/latlon-geohash)
 * react-native-modal-overlay (https://github.com/rgabs/react-native-modal-overlay)
 * react-native-elements (https://react-native-elements.github.io/react-native-elements/)
+* react-native-community/async-storage (https://github.com/react-native-community/async-storage)
+* react-native-onboarding-swiper (https://github.com/jfilter/react-native-onboarding-swiper)
