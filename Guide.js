@@ -18,23 +18,37 @@ const Guide = () => {
       pages={[
         {
           backgroundColor: "#fff",
-          image: <Image source={require("./img/geohash_logo.png")} />,
-          title: "Onboarding",
-          subtitle: "Done with React Native Onboarding Swiper",
+          image: <Image source={require("./img/onboarding/low_res/long_press.png")} />,
+          title: "Mantén presionado",
+          subtitle: "Para obtener el código de tu ubicación actual",
         },
         {
-          backgroundColor: "#fe6e58",
-          image: <Image source={require("./img/geohash_logo.png")} />,
-          title: "The Title",
-          subtitle: "This is the subtitle that sumplements the title.",
+          backgroundColor: "#fff",
+          image: <Image source={require("./img/onboarding/low_res/marker_drag.png")} />,
+          title: "Mantén el marcador presionado",
+          subtitle: "Para arrastrarlo y ver el código de esa ubicación",
         },
         {
-          backgroundColor: "#999",
-          image: <Image source={require("./img/geohash_logo.png")} />,
-          title: "Triangle",
-          subtitle: "Beautiful, isn't it?",
+          backgroundColor: "#fff",
+          image: <Image source={require("./img/onboarding/low_res/click_code.png")} />,
+          title: "Presiona sobre el código actual",
+          subtitle: "Para ver más opciones como compartir o ingresar uno nuevo",
+        },
+        {
+          backgroundColor: "#fff",
+          image: <Image source={require("./img/onboarding/low_res/hash_input.png")} />,
+          title: "Puedes ingresar un código nuevo",
+          subtitle: "Digitandolo o pegandolo desde otra aplicación, no te preocupes por los guiones o por mayúsculas o minúsculas",
+        },
+        {
+          backgroundColor: "#fff",
+          image: <Image source={require("./img/onboarding/low_res/share.png")} />,
+          title: "El código actual",
+          subtitle: "Puede ser compartido como texto o abrirse en tu aplicación de mapas favorita",
         },
       ]}
+      skipLabel={'Saltar'}
+      nextLabel={'Siguiente'}
     />
   ) : (
     <MainMap></MainMap>
