@@ -8,7 +8,7 @@ import {
   Platform,
   Share,
   Image,
-  PermissionsAndroid
+  PermissionsAndroid,
 } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
@@ -63,7 +63,6 @@ function MainMap() {
   const [geohashInput, setGeohashInput] = useState("");
   const [formattedAddress, setFormattedAddress] = useState(null);
 
-
   const requestAndroidGPSPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -73,19 +72,19 @@ function MainMap() {
     } catch (err) {
       throw err;
     }
-  }
+  };
 
   const getCurrentLocation = async () => {
-    if(Platform.OS === "android"){
-      requestAndroidGPSPermission().then((granted)=>{
-        if(granted === PermissionsAndroid.RESULTS.GRANTED){
+    if (Platform.OS === "android") {
+      requestAndroidGPSPermission().then((granted) => {
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           getGPSLocation();
         }
       });
-    }else{
+    } else {
       getGPSLocation();
     }
-  }
+  };
 
   const getGPSLocation = () => {
     setIsLoading(true);
@@ -326,9 +325,9 @@ function MainMap() {
               <Text>
                 {`Latitud: ${mapLocation.latitude}` +
                   `\nLongitud: ${mapLocation.longitude}` +
-                  (gpsAccuracy > 0
-                    ? `\nPrecisión del GPS: ${gpsAccuracy} m\u00B2`
-                    : "")}
+                  `\nPrecisión del GPS: ${
+                    gpsAccuracy > 0 ? gpsAccuracy + "m\u00B2" : "--"
+                  }`}
               </Text>
             </Callout>
           </Marker>
