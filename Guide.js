@@ -19,7 +19,7 @@ const Guide = () => {
         {
           backgroundColor: "#f8f9f9",
           image: <Image source={require("./img/onboarding/low_res/geohash.png")} />,
-          title: "¿Qué es un código geohash?",
+          title: "¿Qué es un código GeoNumber?",
           subtitle: "Divide el mundo en cuadrantes de aproximadamente 4.7m\u00B2 a los cuales se les asigna un código de números y letras faciles de compartir",
         },
         {

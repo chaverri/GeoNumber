@@ -9,11 +9,12 @@ export default StyleSheet.create({
     fontSize: 25,
     textAlign: "center",
     fontWeight: "bold",
+    color: "#495057",
   },
   geohashView: {
     position: "absolute",
     top: 85,
-    backgroundColor: "rgba(255,255,255, 0.8)",
+    backgroundColor: "rgba(255,255,255, 0.9)",
     width: "100%",
     height: 40,
   },
@@ -28,14 +29,14 @@ export default StyleSheet.create({
     fontSize: 23,
     textAlign: "center",
     fontWeight: "bold",
-    borderColor: "gray",
+    borderColor: "#495057",
     borderWidth: 1,
     height: 40,
     width: "90%",
     textAlignVertical: "center",
     paddingTop: 0,
     paddingBottom: 0,
-    color: "#000",
+    color: "#495057",
   },
   row: {
     flexDirection: "row",
@@ -46,7 +47,7 @@ export default StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
   },
-  hashInputButton: { backgroundColor: "black" },
+  hashInputButton: { backgroundColor: "#495057" },
   hashInputErrorVIew: {
     flexDirection: "row",
     justifyContent: "flex-start",
@@ -58,8 +59,25 @@ export default StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     width: "100%",
-    color: "#000"
+    color: "#495057",
+    marginBottom: 5,
   },
-  hashInputErrorMessage: { margin: 4, color: "#b02944", fontWeight: "bold" },
-  hashInputErrorIcon: { margin: 4 }
+  hashInputErrorMessage: { margin: 4, color: "#b02944" },
+  hashInputErrorIcon: { margin: 4 },
+  overlayStyle: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 20,
+    backgroundColor: "rgba(29,31,34,0.75)",
+  },
+  quickMessageView: {
+    flexDirection: "row",
+    justifyContent: "center",
+    width: "100%",
+  },
+  quickMessageText: {
+    color: "#495057",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
 });

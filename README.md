@@ -23,3 +23,4 @@
 * react-native-elements (https://react-native-elements.github.io/react-native-elements/)
 * react-native-community/async-storage (https://github.com/react-native-community/async-storage)
 * react-native-onboarding-swiper (https://github.com/jfilter/react-native-onboarding-swiper)
+* react-native-community/clipboard (https://github.com/react-native-community/clipboard)

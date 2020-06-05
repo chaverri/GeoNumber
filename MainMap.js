@@ -11,7 +11,7 @@ import {
   PermissionsAndroid,
 } from "react-native";
 import MapView, {
-  PROVIDER_GOOGLE,
+  PROVIDER_DEFAULT,
   Marker,
   Callout,
   Circle,
@@ -20,6 +20,7 @@ import MapView, {
 import Overlay from "react-native-modal-overlay";
 import { Icon, Button } from "react-native-elements";
 import Geolocation from "@react-native-community/geolocation";
+import Clipboard from "@react-native-community/clipboard";
 import Geohash from "latlon-geohash";
 import Geocoding from "./Geocoding";
 import Styles from "./styles/Style";
@@ -62,6 +63,7 @@ function MainMap() {
   const [isHashInputValid, setIsHashInputValid] = useState(true);
   const [geohashInput, setGeohashInput] = useState("");
   const [formattedAddress, setFormattedAddress] = useState(null);
+  const [quickMessage, setQuickMessage] = useState("");
 
   const requestAndroidGPSPermission = async () => {
     try {
@@ -270,6 +272,13 @@ function MainMap() {
       });
   };
 
+  const showQuickMessage = (message) => {
+    setQuickMessage(message);
+    setTimeout(() => {
+      setQuickMessage("");
+    }, 3000);
+  };
+
   useEffect(() => {
     getCurrentLocation();
   }, []);
@@ -278,7 +287,7 @@ function MainMap() {
     <View style={Styles.mainContainer}>
       <View style={Styles.mapView}>
         <MapView
-          provider={PROVIDER_GOOGLE}
+          provider={PROVIDER_DEFAULT}
           region={{ ...mapLocation, ...mapLocationDelta }}
           style={Styles.map}
           onLongPress={getGPSLocation}
@@ -354,6 +363,7 @@ function MainMap() {
       <Overlay
         visible={isModalVisible}
         onClose={closeModal}
+        containerStyle={Styles.overlayStyle}
         closeOnTouchOutside
       >
         <View style={Styles.modalInputView}>
@@ -422,7 +432,7 @@ function MainMap() {
             style={Styles.hashInputErrorIcon}
           />
           <Text style={Styles.hashInputErrorMessage}>
-            Código geohash no reconocido.
+            Código GeoNumber no reconocido.
           </Text>
         </View>
         {/*Modal buttons view --> */}
@@ -430,9 +440,34 @@ function MainMap() {
           <Icon
             reverse
             raised
+            name="copy"
+            type="font-awesome-5"
+            color="#495057"
+            size={25}
+            onPress={() => {
+              Clipboard.setString(getCurrentGeoHashFormatted());
+              showQuickMessage("El GeoNumber ha sido copiado!");
+            }}
+          />
+          <Icon
+            reverse
+            raised
+            name="paste"
+            type="font-awesome-5"
+            color="#495057"
+            size={25}
+            onPress={() => {
+              Clipboard.getString().then((text) => {
+                setGeohashInput(text);
+              });
+            }}
+          />
+          <Icon
+            reverse
+            raised
             name="share-alt"
             type="font-awesome-5"
-            color="#000"
+            color="#495057"
             size={25}
             onPress={() => {
               Share.share({
@@ -443,14 +478,18 @@ function MainMap() {
           <Icon
             reverse
             raised
-            name="external-link-alt"
+            name="map-marked-alt"
             type="font-awesome-5"
-            color="#000"
+            color="#495057"
             size={25}
             onPress={() => {
               openInMap();
             }}
           />
+        </View>
+        {/*Modal quick message --> */}
+        <View style={Styles.quickMessageView}>
+          <Text style={Styles.quickMessageText}>{quickMessage}</Text>
         </View>
       </Overlay>
     </View>
