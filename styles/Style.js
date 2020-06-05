@@ -14,7 +14,7 @@ export default StyleSheet.create({
   geohashView: {
     position: "absolute",
     top: 85,
-    backgroundColor: "rgba(255,255,255, 0.9)",
+    backgroundColor: "rgba(255,255,255, 0.8)",
     width: "100%",
     height: 40,
   },

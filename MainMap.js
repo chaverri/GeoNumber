@@ -32,6 +32,8 @@ const unknownGeohash = "?-????-????";
 const hashPrecision = 9;
 
 const mapMarkerAnchor = { x: 0.5, y: 0.9 };
+const mapMarkerCenterOffset = {x: -2, y: -43}
+
 const geolocationOptions = {
   enableHighAccuracy: true,
   timeout: 20000,
@@ -302,6 +304,7 @@ function MainMap() {
             draggable
             coordinate={mapLocation}
             anchor={mapMarkerAnchor}
+            centerOffset={mapMarkerCenterOffset}
             onDragEnd={(e) => {
               setMapLocation({
                 latitude: roundCoordinates(e.nativeEvent.coordinate.latitude),
