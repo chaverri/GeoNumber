@@ -1,6 +1,6 @@
 # GeoNumber (mobile)
 
-## About Geohash
+## About Geohash geocode system
 
 * What is Geoash: https://en.wikipedia.org/wiki/Geohash
 * Geohash explorer: https://www.movable-type.co.uk/scripts/geohash.html
@@ -10,7 +10,7 @@
 
 * Node.js (https://nodejs.org/)
 * Yarn (https://classic.yarnpkg.com/)
-* Expo (https://expo.io/)
+* React Native (https://github.com/facebook/react-native) 
 
 
 
