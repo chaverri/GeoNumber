@@ -32,11 +32,11 @@ const unknownGeohash = "?-????-????";
 const hashPrecision = 9;
 
 const mapMarkerAnchor = { x: 0.5, y: 0.9 };
-const mapMarkerCenterOffset = {x: -2, y: -43}
+const mapMarkerCenterOffset = { x: -2, y: -43 };
 
 const geolocationOptions = {
   enableHighAccuracy: true,
-  timeout: 20000,
+  timeout: 120000,
   maximumAge: 0,
 };
 
