@@ -1,4 +1,4 @@
-# Geohash (mobile)
+# GeoNumber (mobile)
 
 ## About Geohash
 
