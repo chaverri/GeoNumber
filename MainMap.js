@@ -28,7 +28,7 @@ import Styles from "./styles/Style";
 const defaultLatitudeDelta = 0.00122;
 const defaultLongitudeDelta = 0.000421;
 const defaultAccuracy = 0;
-const unknownGeohash = "?-????-????";
+const unknownGeohash = "Obteniendo ubicación actual ...";
 const hashPrecision = 9;
 
 const mapMarkerAnchor = { x: 0.5, y: 0.9 };
@@ -104,7 +104,21 @@ function MainMap() {
         setCurrentGeohash(getGeoHashFromCoordinates(position.coords));
         setIsLoading(false);
       },
-      (error) => Alert.alert("No ha sido posible obtener su ubicación actual."),
+      (error) => {
+        Alert.alert(
+          "Imposible obtener ubicación actual",
+          "Por el momento se mostrará una ubicación de prueba.\n\nPor favor intente de nuevo",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                setCurrentGeohash(getGeoHashFromCoordinates(mapLocation));
+                setIsLoading(false);
+              },
+            },
+          ]
+        );
+      },
       geolocationOptions
     );
   };
