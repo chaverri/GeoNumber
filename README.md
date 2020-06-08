@@ -24,3 +24,10 @@
 * react-native-community/async-storage (https://github.com/react-native-community/async-storage)
 * react-native-onboarding-swiper (https://github.com/jfilter/react-native-onboarding-swiper)
 * react-native-community/clipboard (https://github.com/react-native-community/clipboard)
+
+## Get Started:
+``` console
+npm install -g react-native-cli
+react-native run-android # Android emulator must has been started
+react-native run-ios # It needs Xcode and a working iOS simulator
+```
