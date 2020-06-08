@@ -31,14 +31,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Se necesita acceso a su ubicación para generar su código GeoNumber actual.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Se necesita acceso a su ubicación para generar su código GeoNumber actual.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Se necesita acceso a su ubicación para generar su código GeoNumber actual.</string>
-	<key>NSMotionUsageDescription</key>
-	<string>Allow GeoNumber to access your device's accelerometer</string>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

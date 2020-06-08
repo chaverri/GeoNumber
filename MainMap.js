@@ -19,7 +19,7 @@ import MapView, {
 } from "react-native-maps";
 import Overlay from "react-native-modal-overlay";
 import { Icon, Button } from "react-native-elements";
-import Geolocation from "@react-native-community/geolocation";
+import Geolocation from "react-native-geolocation-service";
 import Clipboard from "@react-native-community/clipboard";
 import Geohash from "latlon-geohash";
 import Geocoding from "./Geocoding";
@@ -78,6 +78,15 @@ function MainMap() {
     }
   };
 
+  const requestiOSGPSPermission = async () => {
+    try {
+      const granted = await Geolocation.requestAuthorization('whenInUse');
+      return granted;
+    } catch (err) {
+      throw err;
+    }
+  };
+
   const getCurrentLocation = async () => {
     if (Platform.OS === "android") {
       requestAndroidGPSPermission().then((granted) => {
@@ -86,7 +95,11 @@ function MainMap() {
         }
       });
     } else {
-      getGPSLocation();
+      requestiOSGPSPermission().then((granted) => {
+        if (granted === 'granted') {
+          getGPSLocation();
+        }
+      });
     }
   };
 
