@@ -80,7 +80,7 @@ function MainMap() {
 
   const requestiOSGPSPermission = async () => {
     try {
-      const granted = await Geolocation.requestAuthorization('whenInUse');
+      const granted = await Geolocation.requestAuthorization("whenInUse");
       return granted;
     } catch (err) {
       throw err;
@@ -96,7 +96,7 @@ function MainMap() {
       });
     } else {
       requestiOSGPSPermission().then((granted) => {
-        if (granted === 'granted') {
+        if (granted === "granted") {
           getGPSLocation();
         }
       });
@@ -154,7 +154,7 @@ function MainMap() {
 
   const getCurrentGeoHashFormatted = () => {
     return currentGeohash
-      ? currentGeohash.toUpperCase().replace(/(.{1})(.{4})(.{4})/gi, "$1-$2-$3")
+      ? currentGeohash.toUpperCase().replace(/(.{3})(.{3})(.{3})/gi, "$1-$2-$3")
       : unknownGeohash;
   };
 
@@ -178,7 +178,6 @@ function MainMap() {
   };
 
   const parseGeohashToCoordinates = (geohash) => {
-    let coordinates = null;
     try {
       coordinates = Geohash.decode(geohash);
 
@@ -186,9 +185,9 @@ function MainMap() {
         latitude: coordinates.lat,
         longitude: coordinates.lon,
       };
-    } catch (e) {}
-
-    return coordinates;
+    } catch (e) {
+      return null;
+    }
   };
 
   const getGeohashAreaBounds = () => {
@@ -356,11 +355,8 @@ function MainMap() {
               setIsLoading(false);
             }}
           >
-            <Image
-              source={isLoading ? unknownMarkerImage : markerImage}
-              style={Styles.mapMarker}
-            />
-            <Callout style={{ width: 200 }}>
+            <Image source={markerImage} style={Styles.mapMarker} />
+            <Callout style={Styles.markerCallout}>
               <Text>
                 {`Latitud: ${mapLocation.latitude}` +
                   `\nLongitud: ${mapLocation.longitude}` +
