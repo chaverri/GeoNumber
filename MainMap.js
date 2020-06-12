@@ -295,7 +295,8 @@ function MainMap() {
       .then((formattedAddressFromAPI) =>
         setFormattedAddress(formattedAddressFromAPI)
       )
-      .catch(() => {
+      .catch((error) => {
+        console.log(error);
         setFormattedAddress(null);
       });
   };
