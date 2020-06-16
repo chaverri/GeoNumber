@@ -19,7 +19,7 @@ import MapView, {
 } from "react-native-maps";
 import Overlay from "react-native-modal-overlay";
 import { Icon, Button } from "react-native-elements";
-import Geolocation from "@react-native-community/geolocation";
+import Geolocation from "react-native-geolocation-service";
 import Clipboard from "@react-native-community/clipboard";
 import Geohash from "latlon-geohash";
 import Geocoding from "./Geocoding";
@@ -78,6 +78,15 @@ function MainMap() {
     }
   };
 
+  const requestiOSGPSPermission = async () => {
+    try {
+      const granted = await Geolocation.requestAuthorization("whenInUse");
+      return granted;
+    } catch (err) {
+      throw err;
+    }
+  };
+
   const getCurrentLocation = async () => {
     if (Platform.OS === "android") {
       requestAndroidGPSPermission().then((granted) => {
@@ -86,7 +95,11 @@ function MainMap() {
         }
       });
     } else {
-      getGPSLocation();
+      requestiOSGPSPermission().then((granted) => {
+        if (granted === "granted") {
+          getGPSLocation();
+        }
+      });
     }
   };
 
@@ -141,7 +154,7 @@ function MainMap() {
 
   const getCurrentGeoHashFormatted = () => {
     return currentGeohash
-      ? currentGeohash.toUpperCase().replace(/(.{1})(.{4})(.{4})/gi, "$1-$2-$3")
+      ? currentGeohash.toUpperCase().replace(/(.{3})(.{3})(.{3})/gi, "$1-$2-$3")
       : unknownGeohash;
   };
 
@@ -165,7 +178,6 @@ function MainMap() {
   };
 
   const parseGeohashToCoordinates = (geohash) => {
-    let coordinates = null;
     try {
       coordinates = Geohash.decode(geohash);
 
@@ -173,9 +185,9 @@ function MainMap() {
         latitude: coordinates.lat,
         longitude: coordinates.lon,
       };
-    } catch (e) {}
-
-    return coordinates;
+    } catch (e) {
+      return null;
+    }
   };
 
   const getGeohashAreaBounds = () => {
@@ -283,7 +295,8 @@ function MainMap() {
       .then((formattedAddressFromAPI) =>
         setFormattedAddress(formattedAddressFromAPI)
       )
-      .catch(() => {
+      .catch((error) => {
+        console.log(error);
         setFormattedAddress(null);
       });
   };
@@ -343,11 +356,8 @@ function MainMap() {
               setIsLoading(false);
             }}
           >
-            <Image
-              source={isLoading ? unknownMarkerImage : markerImage}
-              style={Styles.mapMarker}
-            />
-            <Callout style={{ width: 200 }}>
+            <Image source={markerImage} style={Styles.mapMarker} />
+            <Callout style={Styles.markerCallout}>
               <Text>
                 {`Latitud: ${mapLocation.latitude}` +
                   `\nLongitud: ${mapLocation.longitude}` +

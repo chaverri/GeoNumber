@@ -80,4 +80,5 @@ export default StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
   },
+  markerCallout: { width: 200 },
 });
