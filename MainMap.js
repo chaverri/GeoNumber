@@ -34,6 +34,9 @@ const hashPrecision = 9;
 const mapMarkerAnchor = { x: 0.5, y: 0.9 };
 const mapMarkerCenterOffset = { x: -2, y: -43 };
 
+const latlonRegex = /(-?\d+(\.\d+)?),*(-?\d+(\.\d+)?)/g;
+const formattedGeohashRegex = /(.{3})(.{3})(.{3})/gi;
+
 const geolocationOptions = {
   enableHighAccuracy: true,
   timeout: 120000,
@@ -41,7 +44,6 @@ const geolocationOptions = {
 };
 
 const markerImage = require("./img/target.png");
-const unknownMarkerImage = require("./img/target_question.png");
 let lastGeocodeQuery = null;
 
 function MainMap() {
@@ -154,7 +156,7 @@ function MainMap() {
 
   const getCurrentGeoHashFormatted = () => {
     return currentGeohash
-      ? currentGeohash.toUpperCase().replace(/(.{3})(.{3})(.{3})/gi, "$1-$2-$3")
+      ? currentGeohash.toUpperCase().replace(formattedGeohashRegex, "$1-$2-$3")
       : unknownGeohash;
   };
 
@@ -241,20 +243,18 @@ function MainMap() {
 
   const openInMap = () => {
     const scheme = Platform.select({
-      ios: "maps:0,0?q=",
-      android: "geo:0,0?q=",
+      ios: "maps:",
+      android: "geo:",
     });
 
-    const latLng = `${mapLocation.latitude},${mapLocation.longitude}`;
+    const latLng = getCoordiantesAsString(mapLocation);
     const label = getCurrentGeoHashFormatted();
     const url = Platform.select({
-      ios: `${scheme}${label}@${latLng}`,
-      android: `${scheme}${latLng}(${label})`,
+      ios: `${scheme}${latLng}?q=${label}@${latLng}`,
+      android: `${scheme}${latLng}?q=${latLng}(${label})`,
     });
 
-    let browser_url = `https://www.google.com/maps/search/?api=1&query=${getCoordiantesAsString(
-      mapLocation
-    )}`;
+    let browser_url = `https://maps.google.com/?q=${latLng}`;
 
     Linking.canOpenURL(url)
       .then((supported) => {
@@ -308,8 +308,46 @@ function MainMap() {
     }, 3000);
   };
 
+  const initialUrlIntentHandler = (url) => {
+    let coordinates = url.match(latlonRegex);
+    let validCoordinate =
+      coordinates &&
+      coordinates.find(
+        (coordinate) => coordinate.includes(",") && coordinate != "0,0"
+      );
+    if (validCoordinate) {
+      let latitude = parseFloat(validCoordinate.split(",")[0]);
+      let longitude = parseFloat(validCoordinate.split(",")[1]);
+      let location = {
+        latitude: roundCoordinates(latitude),
+        longitude: roundCoordinates(longitude),
+      };
+
+      setMapLocation(location);
+      setGPSAccuracy(defaultAccuracy);
+
+      let geohash = getGeoHashFromCoordinates(location);
+      setCurrentGeohash(geohash);
+
+      setIsModalVisible(false);
+    }
+  };
+
+  const linkingUrlEventListener = (e) => {
+    if (e && e.url) {
+      initialUrlIntentHandler(e.url);
+    }
+  };
+
   useEffect(() => {
-    getCurrentLocation();
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        initialUrlIntentHandler(url);
+      } else {
+        getCurrentLocation();
+      }
+    });
+    Linking.addEventListener("url", linkingUrlEventListener);
   }, []);
 
   return (
