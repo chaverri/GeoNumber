@@ -1,4 +1,5 @@
 apply plugin: "com.android.application"
+apply plugin: 'com.google.gms.google-services'
 
 import com.android.build.OutputFile
 
@@ -133,8 +134,8 @@ android {
         applicationId "com.materealize.geohash"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 271
-        versionName "0.2.7.1"
+        versionCode 272
+        versionName "0.2.7.2"
     }
     splits {
         abi {
@@ -183,6 +184,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
+    implementation "com.google.firebase:firebase-analytics:17.2.2"
     addUnimodulesDependencies()
 
     if (enableHermes) {

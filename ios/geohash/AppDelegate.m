@@ -14,6 +14,7 @@
 #import <UMReactNativeAdapter/UMNativeModulesProxy.h>
 #import <UMReactNativeAdapter/UMModuleRegistryAdapter.h>
 #import <GoogleMaps/GoogleMaps.h>
+@import Firebase;
 
 @interface AppDelegate ()
 
@@ -27,7 +28,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  [GMSServices provideAPIKey:@"AIzaSyAKvwE4FnOZuPV1hipBVKFv5Hawk23mqJc"];
+  [GMSServices provideAPIKey:@"AIzaSyB2oUfisOsTvVaEO3ysrF57Q-lKJNV8QCg"];
   self.moduleRegistryAdapter = [[UMModuleRegistryAdapter alloc] initWithModuleRegistryProvider:[[UMModuleRegistryProvider alloc] init]];
   self.launchOptions = launchOptions;
 
@@ -41,6 +42,8 @@
 #endif
 
   [super application:application didFinishLaunchingWithOptions:launchOptions];
+  
+  [FIRApp configure];
 
   return YES;
 }

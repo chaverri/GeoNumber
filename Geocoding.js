@@ -1,5 +1,5 @@
 class Geocoding {
-  static api_key = "AIzaSyAKvwE4FnOZuPV1hipBVKFv5Hawk23mqJc";
+  static api_key = "AIzaSyB2oUfisOsTvVaEO3ysrF57Q-lKJNV8QCg";
 
   /**
    * Gets a formatted address from Google Geocoding API
