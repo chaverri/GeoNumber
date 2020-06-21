@@ -536,7 +536,9 @@ function MainMap() {
             size={25}
             onPress={() => {
               Share.share({
-                message: `${getCurrentGeoHashFormatted()}\n${formattedAddress}`,
+                message: `${getCurrentGeoHashFormatted()}\n${formattedAddress}\nhttps://maps.google.com/?q=${getCoordiantesAsString(
+                  mapLocation
+                )}\n\nDescarga GeoNumber aquí si aún no la tienes: https://geonumber.page.link/download`,
               });
             }}
           />

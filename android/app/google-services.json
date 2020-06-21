@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "801927006501",
+    "firebase_url": "https://geonumber-9b2be.firebaseio.com",
+    "project_id": "geonumber-9b2be",
+    "storage_bucket": "geonumber-9b2be.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:801927006501:android:4661637075c1dd84e872cc",
+        "android_client_info": {
+          "package_name": "com.materealize.geohash"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "801927006501-jf77otnb7pfc1pjaqm9jegjphuke2hlb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI0tH8GddTumRY0dtKkQh0_2d7u2lL8dw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "801927006501-jf77otnb7pfc1pjaqm9jegjphuke2hlb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
