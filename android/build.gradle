@@ -4,9 +4,10 @@ buildscript {
     ext {
         buildToolsVersion = "28.0.3"
         minSdkVersion = 21
-        compileSdkVersion = 28
-        targetSdkVersion = 28
+        compileSdkVersion = 31
+        targetSdkVersion = 31
         playServicesVersion = "17.0.0"
+        kotlinVersion = "1.6.0"
     }
     repositories {
         google()
@@ -35,5 +36,22 @@ allprojects {
         google()
         jcenter()
         maven { url 'https://jitpack.io' }
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.core:core-ktx:1.6.0'
+    }
+}
+
+def REACT_NATIVE_VERSION = new File(['node', '--print',"JSON.parse(require('fs').readFileSync(require.resolve('react-native/package.json'), 'utf-8')).version"].execute(null, rootDir).text.trim())
+
+allprojects {
+    configurations.all {
+        resolutionStrategy {
+            // Remove this override in 0.65+, as a proper fix is included in react-native itself.
+            force "com.facebook.react:react-native:" + REACT_NATIVE_VERSION
+        }
     }
 }
